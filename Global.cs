@@ -1,103 +1,42 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.OleDb;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace One_Tier
 {
     internal class Global
     {
 
-        static public String cs = @"Provider=Microsoft.ACE.OLEDB.12.0; Data Source=|DataDirectory|MaBase.accdb";
-
-        static public OleDbConnection seConnecter(String strCN)
+        static public string xmlFilePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "MaBase.xml");
+        // Méthode pour charger le document XML
+        static public XDocument ChargerXML()
         {
-            //on va créer un objet de connexion objCN
-            OleDbConnection objCN = new OleDbConnection();
-            try
-            {
-                // Définir la chaîne de connexion
-                objCN.ConnectionString = strCN;
-                // si la connexion est fermée, on l'ouvre avec la méthode open
-                if (objCN.State == System.Data.ConnectionState.Closed)
-                    objCN.Open();
-
-            }
-            catch (Exception)
-            {
-
-                throw;
-            }
-            return objCN;
+            return XDocument.Load(xmlFilePath);
         }
 
-        static public void seDeconnecter(OleDbConnection objCN)
+        // Méthode pour récupérer tous les clients
+        static public List<Client> RecupererClients()
         {
-            try
-            {
-                if (objCN.State == System.Data.ConnectionState.Open)
-                    objCN.Close();
-            }
-            catch (Exception)
-            {
-
-                throw;
-            }
+            XDocument xdoc = ChargerXML();
+            var clients = from client in xdoc.Descendants("Client")
+                          select new Client
+                          {
+                              Id = (int)client.Element("Id"),
+                              Nom = (string)client.Element("Nom"),
+                              Adresse = (string)client.Element("Adresse"),
+                              Solde = (decimal)client.Element("Solde")
+                          };
+            return clients.ToList();
         }
 
-        static public Object ExecuterOleDBScalaire(String strSQL, OleDbConnection objCN)
+        // Classe représentant un Client
+        public class Client
         {
-            Object obj = new object();
-            OleDbCommand objCom = new OleDbCommand(strSQL, objCN);
-            try
-            {
-                obj = objCom.ExecuteScalar();
-            }
-            catch (Exception)
-            {
-
-                throw;
-            }
-            return obj;
-        }
-
-        static public OleDbDataReader ExecuterOleDBSelect(string strSQL, OleDbConnection objCN)
-        {
-            OleDbDataReader objDR = null;
-            OleDbCommand objCom = new OleDbCommand(strSQL, objCN);
-            try
-            {
-                objDR = objCom.ExecuteReader();
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-            return objDR;
-        }
-
-        static public int ExecuterOleDBAction(string strSQL, OleDbConnection objCN, params Object[] objPM)
-        {
-            int nb = -1;
-            OleDbCommand objCOM = new OleDbCommand(strSQL, objCN);
-            try
-            {
-                foreach (Object obj in objPM)
-                {
-                    OleDbParameter objParameter = new OleDbParameter();
-                    objParameter.Value = obj;
-                    objCOM.Parameters.Add(objParameter);
-                }
-                nb = objCOM.ExecuteNonQuery();
-            }
-            catch (Exception)
-            {
-
-                throw;
-            }
-            return nb;
+            public int Id { get; set; }
+            public string Nom { get; set; }
+            public string Adresse { get; set; }
+            public decimal Solde { get; set; }
         }
 
     }

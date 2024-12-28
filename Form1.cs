@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Xml.Linq;
 
 namespace One_Tier
 {
@@ -20,17 +21,26 @@ namespace One_Tier
         private void remplirDatagrdView()
         {
             dgvClients.Rows.Clear();
-            OleDbConnection cn = new OleDbConnection();
-            cn = Global.seConnecter(Global.cs);
-            OleDbDataReader dr = Global.ExecuterOleDBSelect(@"select * from clients order by id asc", cn);
-            while (dr.Read())
-            {
-                dgvClients.Rows.Add(dr.GetValue(0), dr.GetValue(1).ToString(), dr.GetValue(2).ToString(), dr.GetDecimal(3));
-            }
-            Global.seDeconnecter(cn);
-            dr.Close();
-        }
+            var clients = RecupererClients();
 
+            foreach (var client in clients)
+            {
+                dgvClients.Rows.Add(client.Id, client.Nom, client.Adresse, client.Solde);
+            }
+        }
+        private List<Global.Client> RecupererClients()
+        {
+            XDocument xdoc = XDocument.Load(Global.xmlFilePath); // Charger le fichier XML
+            var clients = from client in xdoc.Descendants("Client")
+                          select new Global.Client
+                          {
+                              Id = (int)client.Element("Id"),
+                              Nom = (string)client.Element("Nom"),
+                              Adresse = (string)client.Element("Adresse"),
+                              Solde = (decimal)client.Element("Solde")
+                          };
+            return clients.ToList();
+        }
         private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
 
@@ -38,32 +48,38 @@ namespace One_Tier
 
         private void btnNouveauClient_Click(object sender, EventArgs e)
         {
-            OleDbConnection objCN = new OleDbConnection();
-            objCN.ConnectionString = Global.cs;
-            if (objCN.State == System.Data.ConnectionState.Closed)
-                objCN.Open();
-            string requetAdd = "insert into clients(nom,adresse,solde) values ('Test TDI','Nouveau Adress',45.000)";
-            Global.ExecuterOleDBAction(@requetAdd, objCN);
-            Global.seDeconnecter(objCN);
+            var xdoc = XDocument.Load(Global.xmlFilePath);
+            var clients = xdoc.Element("Clients");
+
+            // Ajouter un nouveau client
+            int newId = clients.Elements("Client").Count() + 1;
+            clients.Add(new XElement("Client",
+                new XElement("Id", newId),
+                new XElement("Nom", "Nouveau Client"),
+                new XElement("Adresse", "Nouvelle Adresse"),
+                new XElement("Solde", 45.000)
+            ));
+
+            // Sauvegarder les modifications dans le fichier XML
+            xdoc.Save(Global.xmlFilePath);
             remplirDatagrdView();
         }
 
         private void btnSupprimerClient_Click(object sender, EventArgs e)
         {
-            OleDbConnection cn = new OleDbConnection();
-            cn = Global.seConnecter(Global.cs);
+            var xdoc = XDocument.Load(Global.xmlFilePath);
+            var clients = xdoc.Element("Clients");
 
-            // Iterate through selected rows
+            // Itérer à travers les lignes sélectionnées
             foreach (DataGridViewRow row in dgvClients.SelectedRows)
             {
-                // Accessing cell values
-                string idCell = row.Cells[0].Value.ToString();
-                string requetDelete = "delete from clients where id =" + idCell;
-                Global.ExecuterOleDBAction(@requetDelete, cn);
-
-
+                int idCell = (int)row.Cells[0].Value;
+                var clientToRemove = clients.Elements("Client").FirstOrDefault(c => (int)c.Element("Id") == idCell);
+                clientToRemove?.Remove();
             }
-            Global.seDeconnecter(cn);
+
+            // Sauvegarder les modifications dans le fichier XML
+            xdoc.Save(Global.xmlFilePath);
             remplirDatagrdView();
         }
 
