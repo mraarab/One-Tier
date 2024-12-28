@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Clients>
+  <Client>
+    <Id>1</Id>
+    <Nom>Jean Dupont</Nom>
+    <Adresse>10 Rue de la Paix, Paris</Adresse>
+    <Solde>1500.75</Solde>
+  </Client>
+  <Client>
+    <Id>2</Id>
+    <Nom>Marie Curie</Nom>
+    <Adresse>25 Avenue des Champs-Élysées, Paris</Adresse>
+    <Solde>2500.00</Solde>
+  </Client>
+  <Client>
+    <Id>3</Id>
+    <Nom>Paul Martin</Nom>
+    <Adresse>15 Boulevard Saint-Germain, Paris</Adresse>
+    <Solde>320.50</Solde>
+  </Client>
+  <Client>
+    <Id>4</Id>
+    <Nom>Nouveau Client</Nom>
+    <Adresse>Nouvelle Adresse</Adresse>
+    <Solde>45</Solde>
+  </Client>
+  <Client>
+    <Id>5</Id>
+    <Nom>Nouveau Client</Nom>
+    <Adresse>Nouvelle Adresse</Adresse>
+    <Solde>45</Solde>
+  </Client>
+  <Client>
+    <Id>6</Id>
+    <Nom>Nouveau Client</Nom>
+    <Adresse>Nouvelle Adresse</Adresse>
+    <Solde>45</Solde>
+  </Client>
+  <Client>
+    <Id>7</Id>
+    <Nom>Nouveau Client</Nom>
+    <Adresse>Nouvelle Adresse</Adresse>
+    <Solde>45</Solde>
+  </Client>
+</Clients>
